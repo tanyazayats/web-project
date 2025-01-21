@@ -1,36 +1,27 @@
-<!DOCTYPE html>
-<html lang="en">
+<div>
+    <input type="text" id="userInput" placeholder="Enter your name..." />
+    <input type="text" id="messageInput" placeholder="Enter your message..." />
+    <button onclick="sendMessage()">Send</button>
+</div>
+<ul id="messagesList"></ul>
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="styles.css">
-    <title>Екологічно чисті товари</title>
-</head>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/signalr/3.1.18/signalr.min.js"></script>
+<script>
+    const connection = new signalR.HubConnectionBuilder()
+        .withUrl("/chatHub")
+        .build();
 
-<body>
-    <header>
-        <h1>Екологічно чисті товари</h1>
-        <nav>
-            <ul>
-                <li><a href="index.html">Home</a></li>
-                <li><a href="shop.html">Shop</a></li>
-                <li><a href="about.html">About Us</a></li>
-                <li><a href="contact.html">Contact</a></li>
-            </ul>
-        </nav>
-    </header>
+    connection.on("ReceiveMessage", (user, message) => {
+        const li = document.createElement("li");
+        li.textContent = `${user}: ${message}`;
+        document.getElementById("messagesList").appendChild(li);
+    });
 
-    <main>
-        <section class="featured-products">
-            <h2>Featured Products</h2>
-            <!-- Додайте фото та опис екологічних товарів -->
-        </section>
-    </main>
+    connection.start().catch(err => console.error(err));
 
-    <footer>
-        <p>&copy; 2023 Екологічно чисті товари. All rights reserved.</p>
-    </footer>
-</body>
-
-</html>
+    function sendMessage() {
+        const user = document.getElementById("userInput").value;
+        const message = document.getElementById("messageInput").value;
+        connection.invoke("SendMessage", user, message).catch(err => console.error(err));
+    }
+</script>
